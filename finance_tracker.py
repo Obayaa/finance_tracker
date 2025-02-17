@@ -7,15 +7,15 @@ from tabulate import tabulate
 
 
 class Category:
-    INCOME = "income"
-    GROCERIES = "groceries"
-    RENT = "rent"
-    UTILITIES = "utilities"
-    ENTERTAINMENT = "entertainment"
-    TRANSPORTATION = "transportation"
-    SHOPPING = "shopping"
-    HEALTH = "health"
-    OTHER = "other"
+    INCOME = "Income"
+    GROCERIES = "Groceries"
+    RENT = "Rent"
+    UTILITIES = "Utilities"
+    ENTERTAINMENT = "Entertainment"
+    TRANSPORTATION = "Transportation"
+    SHOPPING = "Shopping"
+    HEALTH = "Health"
+    OTHER = "Other"
 
     @classmethod
     def list_categories(cls):
@@ -34,7 +34,7 @@ class Category:
 
 @dataclass
 class Transaction:
-    date: str
+    date: datetime.date
     amount: float
     category: Category
     description: str
@@ -53,6 +53,16 @@ class Transaction:
             "description": self.description,
             "transaction_type": self.transaction_type,
         }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Transaction':
+        return cls(
+            date=datetime.date.fromisoformat(data["date"]),
+            amount=float(data["amount"],),
+            category=data["category"],
+            description=data["description"],
+            transaction_type=data["transaction_type"],
+        )
 
 
 class Budget:
@@ -75,21 +85,22 @@ class FinanceTracker:
 
     # Let's create a function to load the transactions from the file. This is because, without loading, the file would keep updating itself with existing.
     def load_transactions(self):
-        if self.transactions_file.exists():
-            with open(self.transactions_file, "r") as file:
-                data = json.load(file)
-                transactions_data = data.get("transactions", [])
-                for transaction in transactions_data:
-                    transaction = Transaction(
-                        date=datetime.datetime.strptime(
-                            transaction["date"], "%Y-%m-%d"
-                        ).date(),
-                        amount=transaction["amount"],
-                        category=transaction["category"],
-                        description=transaction["description"],
-                        transaction_type=transaction["transaction_type"],
-                    )
-                    self.transactions.append(transaction)
+        if not self.transactions_file.exists():
+            return
+        
+        with open(self.transactions_file, "r") as file:
+            data = json.load(file)
+            
+            self.transactions = [Transaction.from_dict(transaction) for transaction in data["transactions"]]
+            if data.get("budgets") and isinstance(data["budgets"], list) and data["budgets"]:
+                self.budgets = {
+                    category: Budget(budget["category"], budget["amount"])
+                    for category, budget in data["budgets"][0].items()
+                }
+                
+            else:
+                self.budgets = {}
+            
 
     # Let's create a function to handle saving transactions to a file
     def save_transactions(self):
