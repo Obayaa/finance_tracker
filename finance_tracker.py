@@ -4,9 +4,10 @@ import json
 from typing import List, Dict
 from pathlib import Path as path
 from tabulate import tabulate
+from enum import Enum   
 
 
-class Category:
+class Category(Enum):
     INCOME = "Income"
     GROCERIES = "Groceries"
     RENT = "Rent"
@@ -19,17 +20,7 @@ class Category:
 
     @classmethod
     def list_categories(cls):
-        return [
-            cls.INCOME,
-            cls.GROCERIES,
-            cls.RENT,
-            cls.UTILITIES,
-            cls.TRANSPORTATION,
-            cls.ENTERTAINMENT,
-            cls.SHOPPING,
-            cls.HEALTH,
-            cls.OTHER,
-        ]
+        return [cat.value for cat in cls]
 
 
 @dataclass
@@ -43,13 +34,9 @@ class Transaction:
     # Method to convert the transaction object to a dictionary. Without this there would be a TypeError
     def to_dict(self):
         return {
-            "date": (
-                self.date
-                if isinstance(self.date, str)
-                else self.date.strftime("%Y-%m-%d")
-            ),
+            "date": self.date.strftime("%Y-%m-%d"),
             "amount": self.amount,
-            "category": self.category,
+            "category": self.category.value,
             "description": self.description,
             "transaction_type": self.transaction_type,
         }
@@ -59,7 +46,7 @@ class Transaction:
         return cls(
             date=datetime.date.fromisoformat(data["date"]),
             amount=float(data["amount"],),
-            category=data["category"],
+            category=Category(data["category"]),
             description=data["description"],
             transaction_type=data["transaction_type"],
         )
@@ -135,8 +122,8 @@ class FinanceTracker:
                 print(f"{i}. {cat}")
 
             cat_choice = int(input("Select category number: "))
-            if 1 <= cat_choice <= len(categories):
-                category = categories[cat_choice - 1]
+            if 1 <= cat_choice <= len(Category):
+                category = list(Category)[cat_choice - 1]
             else:
                 raise ValueError(
                     "Invalid category choice. Please select a valid category."
@@ -180,8 +167,8 @@ class FinanceTracker:
             print(f"{i}. {cat}")
 
         cat_choice = int(input("Select category number: "))
-        if 1 <= cat_choice <= len(categories):
-            category = categories[cat_choice - 1]
+        if 1 <= cat_choice <= len(Category):
+            category = list(Category)[cat_choice - 1]
         else:
             raise ValueError("Invalid category choice. Please select a valid category.")
 
@@ -203,7 +190,7 @@ class FinanceTracker:
             print("\nBudgets:")
             headers = ["Category", "Amount"]
             rows = [
-                [budget.category, budget.amount] for budget in self.budgets.values()
+                [budget.category.value, budget.amount] for budget in self.budgets.values()
             ]
             print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
 

@@ -1,76 +1,26 @@
 {
-    "transactions": [
-        {
-            "date": "2025-12-02",
-            "amount": 500.0,
-            "category": "health",
-            "description": "hospital bills",
-            "transaction_type": "expense"
-        },
-        {
-            "date": "2025-02-17",
-            "amount": 1000.0,
-            "category": "income",
-            "description": "christmas present",
-            "transaction_type": "income"
-        },
-        {
-            "date": "2025-02-12",
-            "amount": 400.0,
-            "category": "shopping",
-            "description": "cloths shopping",
-            "transaction_type": "expense"
-        },
-        {
-            "date": "2025-02-02",
-            "amount": 1200.0,
-            "category": "health",
-            "description": "medical labs",
-            "transaction_type": "expense"
-        },
-        {
-            "date": "2024-12-14",
-            "amount": 2000.0,
-            "category": "income",
-            "description": "Income from sales",
-            "transaction_type": "income"
-        },
-        {
-            "date": "2024-12-12",
-            "amount": 20000.0,
-            "category": "income",
-            "description": "income from shopping duplex",
-            "transaction_type": "income"
-        },
-        {
-            "date": "2024-03-23",
-            "amount": 1000.0,
-            "category": "income",
-            "description": "income from mechanic shop",
-            "transaction_type": "income"
-        },
-        {
-            "date": "2025-12-02",
-            "amount": 1000.0,
-            "category": "Transportation",
-            "description": "transportation to customer at GCB",
-            "transaction_type": "expense"
-        }
-    ],
-    "budgets": [
-        {
-            "Rent": {
-                "category": "Rent",
-                "amount": 1000.0
-            },
-            "Health": {
-                "category": "Health",
-                "amount": 1000.0
-            },
-            "Utilities": {
-                "category": "Utilities",
-                "amount": 500.0
+    "transactions": {
+        "income": [
+            {
+                "date": "2024-12-31",
+                "amount": 4000.0,
+                "category": "Salary",
+                "description": "mechanic",
+                "transaction_type": "income"
             }
-        }
-    ]
+        ],
+        "expense": [
+            {
+                "date": "2024-12-11",
+                "amount": 200.0,
+                "category": "Health",
+                "description": "Medical bills",
+                "transaction_type": "expense"
+            }
+        ]
+    },
+    "budgets": {
+        "Health": 1000.0,
+        "Rent": 1200.0
+    }
 }
