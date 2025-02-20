@@ -4,8 +4,11 @@ from dataclasses import dataclass
 from typing import List, Dict
 from pathlib import Path
 from tabulate import tabulate
-import datetime
+import argparse
 import pandas as pd
+import hashlib
+import getpass
+
 
 
 class Category:
@@ -45,8 +48,15 @@ class Transaction:
             description=data["description"],
             transaction_type=data["transaction_type"],
         )
-
-
+        
+# def hash_password(password):
+#     return hashlib.sha256(password.encode()).hexdigest()
+    
+# def authenticate():
+#     user_password = hash_password("securepassword")
+#     entered_password = hash_password(getpass.getpass("Enter a password: "))
+    
+    
 class FinanceTracker:
     def __init__(self):
         self.transactions: Dict[str, List[Transaction]] = {"income": [], "expense": []}
@@ -86,14 +96,25 @@ class FinanceTracker:
             json.dump(data, file, indent=4)
 
     def add_transaction(self):
+        
         try:
             print("\nAdding a new transaction...")
             transaction_type = input("Enter type (income/expense): ").lower()
             if transaction_type not in ["income", "expense"]:
                 raise ValueError("Invalid transaction type. Choose 'income' or 'expense'.")
             
-            date_str = input("Enter the date (YYYY-MM-DD): ")
-            date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+            date_str = input("Enter the date (YYYY-MM-DD) or press enter to ue today's date: ")
+            if not date_str:
+                date = datetime.date.today()
+            else:
+                try:
+                    date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+                    if date > datetime.date.today():
+                        print("Warning: You are adding a transaction with a future date!")
+                except ValueError:
+                    print("Invalid date format: please YYYY-MM-DD")
+                    return
+                
             amount = float(input("Enter amount: "))
             if amount <= 0:
                 raise ValueError("Amount must be greater than zero.")
@@ -108,8 +129,12 @@ class FinanceTracker:
                 category = Category.list_categories()[cat_choice - 1]
             
             description = input("Enter description: ")
-            transaction = Transaction(date, amount, category, description, transaction_type)
-            self.transactions[transaction_type].append(transaction)
+            new_transaction = Transaction(date, amount, category, description, transaction_type)
+            if new_transaction in self.transactions[transaction_type]:
+                print("Transaction already exists! \n")
+                return
+            
+            self.transactions[transaction_type].append(new_transaction)
             self.save_transactions()
             print("\nTransaction added successfully!\n")
         except ValueError as e:
@@ -199,6 +224,9 @@ class FinanceTracker:
             
             df["date"] = pd.to_datetime(df["date"], dayfirst=True).dt.strftime("%Y-%m-%d")
             
+            added_count = 0
+            duplicate_count = 0
+            
             for _, row in df.iterrows():
                 transaction = Transaction(
                     date=datetime.date.fromisoformat(row["date"]),
@@ -207,9 +235,18 @@ class FinanceTracker:
                     description=row["description"],
                     transaction_type=row["transaction_type"]
                 )
+                
+                if transaction in self.transactions[transaction.transaction_type]:
+                    duplicate_count +=1
+                    continue
+                
                 self.transactions[transaction.transaction_type].append(transaction)
+                added_count +=1
+                    
+                    
             self.save_transactions()
-            print("\nTransactions imported successfully!\n")
+            print(f"\n {added_count} new transactions imported successfully!")
+            print(f"{duplicate_count} duplicate transactions skipped. \n")
             
         except Exception as e:
             print(f"\nError importing transactions: {e}\n")
@@ -507,7 +544,58 @@ class FinanceTracker:
                 break
             else:
                 print("Invalid choice. Please try again.")
+                
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Finance Tracker CLI")
+    
+    # Transaction options
+    parser.add_argument("--add-income", type=float, help="Add an income transaction")
+    parser.add_argument("--add-expense", type=float, help="Add an expense transaction")
+    parser.add_argument("--category", type=str, help="Specify transaction category")
+    parser.add_argument("--description", type=str, help="Transaction description")
+    
+    # File operations
+    parser.add_argument("--export", type=str, help="Export financial summary (CSV/JSON)")
+    # Had to update import to inport to resolve naimg conflict
+    parser.add_argument("--inport", type=str, help="Import transactions from CSV/JSON")
+    
+    return parser.parse_args()
+
+def handle_args(args, tracker):
+    """Handles command-line arguments and prevents duplicate transactions."""
+    if args.add_income or args.add_expense:
+        transaction_type = "income" if args.add_income else "expense"
+        amount = args.add_income if args.add_income else args.add_expense
+        category = args.category if args.category else "Other"
+        description = args.description if args.description else "No description"
+        date = datetime.date.today() if not args.date else datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
+
+        # Create transaction object
+        transaction = Transaction(date, amount, category, description, transaction_type)
+
+        # Check if the transaction already exists before adding
+        if transaction in tracker.transactions[transaction.transaction_type]:
+            print("\n⚠️ Duplicate transaction detected! Entry not added.\n")
+            return
+
+        # If unique, add transaction
+        tracker.transactions[transaction.transaction_type].append(transaction)
+        tracker.save_transactions()
+        print(f"\n {transaction_type.capitalize()} of {amount} added successfully!\n")
+
+    if args.export:
+        tracker.export_financial_summary(args.export)
+    
+    if args.inport:
+        tracker.import_transactions(args.inport)
+
 
 if __name__ == "__main__":
     tracker = FinanceTracker()
-    tracker.run()
+    args = parse_args()
+    if any(vars(args).values()):
+        handle_args(args, tracker)
+    else:
+        tracker.run()
+    # tracker.run()

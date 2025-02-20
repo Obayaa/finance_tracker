@@ -21,6 +21,20 @@
                 "category": "Salary",
                 "description": "Part-time work",
                 "transaction_type": "income"
+            },
+            {
+                "date": "2025-02-20",
+                "amount": 500.0,
+                "category": "Salary",
+                "description": "Freelance work",
+                "transaction_type": "income"
+            },
+            {
+                "date": "2025-02-20",
+                "amount": 200.0,
+                "category": "Salary",
+                "description": "web design",
+                "transaction_type": "income"
             }
         ],
         "expense": [
@@ -71,6 +85,13 @@
                 "amount": 60.0,
                 "category": "Utilities",
                 "description": "Electricity bill",
+                "transaction_type": "expense"
+            },
+            {
+                "date": "2025-02-20",
+                "amount": 500.0,
+                "category": "Salary",
+                "description": "Freelance work",
                 "transaction_type": "expense"
             }
         ]
