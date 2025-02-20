@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import List, Dict
 from pathlib import Path
 from tabulate import tabulate
-import csv
 import datetime
 import pandas as pd
 
@@ -203,7 +202,7 @@ class FinanceTracker:
             for _, row in df.iterrows():
                 transaction = Transaction(
                     date=datetime.date.fromisoformat(row["date"]),
-                    amount=float(row["amount"],),
+                    amount=float(row["amount"]),
                     category=row["category"],
                     description=row["description"],
                     transaction_type=row["transaction_type"]
@@ -292,31 +291,35 @@ class FinanceTracker:
                     file.write("Income Breakdown\n")
                     df_income = pd.DataFrame(income_data, columns=["Date", "Amount", "Description"])
                     if not df_income.empty:
-                        df_income.to_csv(file, index=False)
-                    
-                    file.write("\nTotal Income:," + str(income_sum) + "\n")
+                        df_income.to_csv(file, index=False, mode="a")
+                    file.write("\n")
+                    file.write(f"Total Income: {income_sum} \n\n")
                         
-                    file.write("\nExpense Breakdown\n")
+                        
+                    file.write("Expense Breakdown\n")
                     df_expense = pd.DataFrame(expense_data, columns=["Date", "Amount", "Category", "Description"])
                     if not df_expense.empty:
-                        df_expense.to_csv(file, index=False)
+                        df_expense.to_csv(file, index=False, mode="a")
+                    file.write("\n")
                         
-                    file.write(f"\nTotal Expenses: {total_expense} \n")
+                    file.write(f"Total Expenses: {total_expense} \n")
                     file.write(f"Actual Savings (after expenses):  {net_savings} \n\n")
                     
                         
                     file.write("Budgets Breakdown\n")
                     df_budget = pd.DataFrame(budget_data, columns=["Category", "Budgetted Amount", "Spent", "Remaining"])
                     if not df_budget.empty:
-                        df_budget.to_csv(file, index=False)
+                        df_budget.to_csv(file, index=False, mode="a")
                     
-                    file.write(f"\nTotal Budget Allocation: {total_budget} \n")
+                    file.write("\n")
+                    
+                    file.write(f"Total Budget Allocation: {total_budget} \n")
                     file.write(f"Planned Savings (after budgeting): {planned_savings} \n")
                         
             elif file_path.endswith(".json"):
                 data = {
                     "income": {"transactions": income_data, "total_income": income_sum },
-                    "expense": {"transactions": expense_data, "total_expense": total_expense, "net_savings": net_savings},
+                    "expense": {"breakdown": expense_data, "total_expense": total_expense, "net_savings": net_savings},
                     "budgets": {"transactions": budget_data, "total_budget": total_budget, "planned_savings": planned_savings}
                 }
                 with open(file_path, "w") as file:
