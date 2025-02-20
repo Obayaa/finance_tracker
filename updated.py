@@ -180,6 +180,7 @@ class FinanceTracker:
         if not all_transactions:
             print("\nNo transactions recorded.\n")
             return
+        print("\nAll Transactions\n")
         headers = ["Date", "Amount", "Category", "Description", "Type"]
         rows = [[t.date, t.amount, t.category, t.description, t.transaction_type] for t in all_transactions]
         print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
@@ -309,7 +310,9 @@ class FinanceTracker:
     
     def display_menu(self):
         menu = """
-        Finance Tracker
+        
+        Welcome to our Finance Tracker Application.
+        Please select an option below:
         ========================
         
         1. Manage Transactions
