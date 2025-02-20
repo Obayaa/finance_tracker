@@ -313,23 +313,54 @@ class FinanceTracker:
         ========================
         
         1. Manage Transactions
-            1 Add Transaction
-            2 Update Transaction
-            3 Delete Transaction
-            4 View Transactions
-            5 Import Transactions
-        
         2. Track Budget
-            1 Set Budget
-            2 View Budget
-        
         3. Data Analysis & Reports
-            1 View Financial Summary
-            2 Export Financial Summary
-            3 Search Transactions
-            4 Spending Reports by Category
         
         0. Exit
+        ========================
+        """
+        print(menu)
+    
+    def transactions_menu(self):
+        menu = """
+        Manage Transactions
+        ========================
+        
+        1. Add Transaction
+        2. Update Transaction
+        3. Delete Transaction
+        4. View Transactions
+        5. Import Transactions
+        
+        0. Back
+        ========================
+        """
+        print(menu)
+    
+    def budget_menu(self):
+        menu = """
+        Track Budget
+        ========================
+        
+        1. Set Budget
+        2. View Budget
+        
+        0. Back
+        ========================
+        """
+        print(menu)
+
+    def data_analysis_menu(self):
+        menu = """
+        Data Analysis & Reports
+        ========================
+        
+        1. View Financial Summary
+        2. Export Financial Summary
+        3. Search Transactions
+        4. Spending Reports by Category
+        
+        0. Back
         ========================
         """
         print(menu)
@@ -339,6 +370,7 @@ class FinanceTracker:
             self.display_menu()
             choice = input("Enter your choice: ")
             if choice == "1":
+                self.transactions_menu()
                 sub_choice = input("Enter sub-option (1-5): ")
                 if sub_choice == "1":
                     self.add_transaction()
@@ -350,13 +382,19 @@ class FinanceTracker:
                     self.view_transactions()
                 elif sub_choice == "5":
                     self.import_transactions()
+                elif sub_choice == "0":
+                    continue
             elif choice == "2":
+                self.budget_menu()
                 sub_choice = input("Enter sub-option (1-2): ")
                 if sub_choice == "1":
                     self.set_budget()
                 elif sub_choice == "2":
                     self.view_budget()
+                elif sub_choice == "0":
+                    continue
             elif choice == "3":
+                self.data_analysis_menu()
                 sub_choice = input("Enter sub-option (1-4): ")
                 if sub_choice == "1":
                     self.view_financial_summary()
@@ -366,6 +404,8 @@ class FinanceTracker:
                     self.search_transactions()
                 elif sub_choice == "4":
                     self.spending_reports_by_category()
+                elif sub_choice == "0":
+                    continue
             elif choice == "0":
                 print("Exiting application. Goodbye!")
                 break
