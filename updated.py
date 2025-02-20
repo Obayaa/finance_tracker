@@ -5,6 +5,8 @@ from typing import List, Dict
 from pathlib import Path
 from tabulate import tabulate
 import csv
+import datetime
+import pandas as pd
 
 
 class Category:
@@ -185,6 +187,34 @@ class FinanceTracker:
         rows = [[t.date, t.amount, t.category, t.description, t.transaction_type] for t in all_transactions]
         print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
         print()
+        
+    def import_transactions(self, file_path):
+        try:
+            if file_path.endswith(".csv"):
+                df = pd.read_csv(file_path)
+            elif file_path.endswith(".json"):
+                df = pd.read_json(file_path)
+            else:
+                print("Invalid file format. Please provide a CSV or JSON file.")
+                return
+            
+            df["date"] = pd.to_datetime(df["date"], dayfirst=True).dt.strftime("%Y-%m-%d")
+            
+            for _, row in df.iterrows():
+                transaction = Transaction(
+                    date=datetime.date.fromisoformat(row["date"]),
+                    amount=float(row["amount"],),
+                    category=row["category"],
+                    description=row["description"],
+                    transaction_type=row["transaction_type"]
+                )
+                self.transactions[transaction.transaction_type].append(transaction)
+            self.save_transactions()
+            print("\nTransactions imported successfully!\n")
+            
+        except Exception as e:
+            print(f"\nError importing transactions: {e}\n")
+            
     
     def view_financial_summary(self):
         print("\nFinancial Summary\n")
@@ -384,7 +414,8 @@ class FinanceTracker:
                 elif sub_choice == "4":
                     self.view_transactions()
                 elif sub_choice == "5":
-                    self.import_transactions()
+                    file_path=input("Enter file path for import: ")
+                    self.import_transactions(file_path)
                 elif sub_choice == "0":
                     continue
             elif choice == "2":
