@@ -5,19 +5,20 @@ from typing import List, Dict
 from pathlib import Path
 from tabulate import tabulate
 import pandas as pd
-from textblob import TextBlob
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
+
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+# colorama.init(autoreset=True)
 
 
 class Category:
     CATEGORIES = [
-        "Groceries",
-        "Rent",
-        "Utilities",
-        "Entertainment",
-        "Transportation",
-        "Shopping",
-        "Health",
-        "Other",
+        "Groceries", "Rent", "Utilities", "Entertainment", "Transportation", "Shopping", "Health", "Other"
     ]
 
     @classmethod
@@ -26,17 +27,32 @@ class Category:
 
     @staticmethod
     def auto_categorize(description: str) -> str:
-        blob = TextBlob(description)
-        noun_phrases = blob.noun_phrases
+        description = description.lower()
         keywords = {
             "food": "Groceries", "supermarket": "Groceries", "rent": "Rent",
-            "electricity": "Utilities", "water": "Utilities", "movie": "Entertainment",
-            "bus": "Transportation", "clothes": "Shopping", "hospital": "Health"
+            "electricity": "Utilities", "water": "Utilities", "movie": "Entertainment", "cinema": "Entertainment",
+            "bus": "Transportation", "car": "Transportation", "fuel": "Transportation", "uber": "Transportation",
+            "clothes": "Shopping", "shopping": "Shopping", "hospital": "Health", "medication": "Health",
+            "trip": "Entertainment", "shoes": "Shopping", "drugs": "Health"
         }
-        for phrase in noun_phrases:
-            for word in phrase.split():
-                if word in keywords:
-                    return keywords[word]
+        
+        lemmatizer = WordNetLemmatizer()
+        words = word_tokenize(description)
+        
+        for word in words:
+            lemma = lemmatizer.lemmatize(word)
+            if lemma in keywords:
+                return keywords[lemma]
+        
+        # Try finding a similar word in WordNet
+        for word in words:
+            lemma = lemmatizer.lemmatize(word)
+            synsets = wordnet.synsets(lemma)
+            for synset in synsets:
+                for lemma_name in synset.lemma_names():
+                    if lemma_name in keywords:
+                        return keywords[lemma_name]
+        
         return "Other"
 
 
