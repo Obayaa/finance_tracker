@@ -10,18 +10,21 @@ import json
 class Credentials:
     username: str
     password: str
+    security_answer: str
     
     def to_dict(self):
         return {
             "username": self.username,
-            "password": self.password
+            "password": self.password,
+            "security_answer": self.security_answer,
         }
     
     @classmethod   
     def from_dict(cls, data: dict) -> 'Credentials':
         return cls(
             username=data["username"],
-            password=data["password"]
+            password=data["password"],
+            security_answer=data.get("security_answer", ""),
         )
     
 class UserAuthentication:
@@ -64,6 +67,7 @@ class UserAuthentication:
                     return
             
             password = input("Enter Password: ")
+
             
             # Password validation
             if len(password) < 8:
@@ -82,11 +86,12 @@ class UserAuthentication:
                 print("Password must contain at least one lowercase letter")
                 return
                 
+            security_answer = input("Set a security question (e.g., your first pet's name): ").strip().lower()
             # Hash password with bcrypt
             hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
             
             # Add new credentials (no separate salt needed)
-            new_credentials = Credentials(username=username, password=hashed_password)
+            new_credentials = Credentials(username=username, password=hashed_password, security_answer=security_answer)
             self.credentials["Auth"].append(new_credentials)
             self.save_credentials()
             print("User registered successfully!")
@@ -105,7 +110,7 @@ class UserAuthentication:
     def check_user_exists(self, username):
         """Check if a username exists in the system"""
         for cred in self.credentials["Auth"]:
-            if cred.username == username.lower():
+            if cred.username == username:
                 return True
         return False
 
@@ -117,8 +122,20 @@ class UserAuthentication:
             print("Username not found. Please register for an account.")
             return
         
+        user_found = next((cred for cred in self.credentials["Auth"] if cred.username == username), None)
 
-        security_answer = input("For security, what was your first pet's name? ")
+        # Ensure user is found (extra safety check)
+        if not user_found:
+            print("Error retrieving user data.")
+            return
+
+        security_answer = input("For security, what was your first pet's name? ").strip().lower()
+        
+        # Validate the security answer
+        if not hasattr(username, "security_answer") or username.security_answer != security_answer:
+            print("Incorrect security answer. Password reset failed.")
+            return
+        
         
         new_password = input("Enter new password: ")
         
