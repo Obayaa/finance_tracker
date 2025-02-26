@@ -1,8 +1,14 @@
 class Menu:
+    def __init__(self, username:str):
+        self.username = username
+        
     def display_menu(self):
+        
+        print(f"Finance Tracker - User: {self.username}")
+            
         menu = """
         
-        Welcome to our Finance Tracker Application.
+        Welcome to your Finance Tracker Application.
         Please select an option below:
         ========================
         

@@ -1,7 +1,7 @@
 {
     "transactions": {
         "income": [
-            {   
+            {
                 "date": "2024-12-31",
                 "amount": 4000.0,
                 "category": "Salary",
@@ -99,6 +99,13 @@
                 "amount": 500.0,
                 "category": "Salary",
                 "description": "Freelance work",
+                "transaction_type": "expense"
+            },
+            {
+                "date": "2025-02-26",
+                "amount": 2000.0,
+                "category": "Rent",
+                "description": "1st 2 year",
                 "transaction_type": "expense"
             }
         ]

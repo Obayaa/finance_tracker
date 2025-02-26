@@ -1,0 +1,25 @@
+{
+    "transactions": {
+        "income": [
+            {
+                "date": "2025-12-11",
+                "amount": 1200.0,
+                "category": "Salary",
+                "description": "building plan",
+                "transaction_type": "income"
+            }
+        ],
+        "expense": [
+            {
+                "date": "2025-02-26",
+                "amount": 1200.0,
+                "category": "Rent",
+                "description": "house rent",
+                "transaction_type": "expense"
+            }
+        ]
+    },
+    "budgets": {
+        "Groceries": 200.0
+    }
+}

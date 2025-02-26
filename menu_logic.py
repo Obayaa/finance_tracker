@@ -5,9 +5,10 @@ from cli_argparse import parse_args, handle_args
 
 
 class MainMenu:
-    def __init__(self):
-        self.tracker = FinanceTracker()
-        self.menu = Menu()
+    def __init__(self, username:str):
+        self.username = username
+        self.tracker = FinanceTracker(username)
+        self.menu = Menu(username)
         
     def run(self):
         while True:
@@ -68,10 +69,10 @@ if __name__ == "__main__":
 
         if auth.verify_login(username, password):
             print("\nLogin successful! Welcome,", username)
-            mainmenu = MainMenu()
+            mainmenu = MainMenu(username)
             args = parse_args()
             if any(vars(args).values()):
-                handle_args(args, mainmenu)
+                handle_args(args, mainmenu.tracker, username)
             else:
                 mainmenu.run()
             break

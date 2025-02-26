@@ -19,7 +19,7 @@ def parse_args():
     
     return parser.parse_args()
 
-def handle_args(args, tracker):
+def handle_args(args, tracker, username=None):
     """Handles command-line arguments and prevents duplicate transactions."""
     if args.add_income or args.add_expense:
         transaction_type = "income" if args.add_income else "expense"

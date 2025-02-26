@@ -5,6 +5,7 @@ from typing import List, Dict
 from pathlib import Path
 from tabulate import tabulate
 import pandas as pd
+from textblob import TextBlob
 
 
 class Category:
@@ -22,6 +23,21 @@ class Category:
     @classmethod
     def list_categories(cls):
         return cls.CATEGORIES
+
+    @staticmethod
+    def auto_categorize(description: str) -> str:
+        blob = TextBlob(description)
+        noun_phrases = blob.noun_phrases
+        keywords = {
+            "food": "Groceries", "supermarket": "Groceries", "rent": "Rent",
+            "electricity": "Utilities", "water": "Utilities", "movie": "Entertainment",
+            "bus": "Transportation", "clothes": "Shopping", "hospital": "Health"
+        }
+        for phrase in noun_phrases:
+            for word in phrase.split():
+                if word in keywords:
+                    return keywords[word]
+        return "Other"
 
 
 @dataclass
@@ -53,10 +69,15 @@ class Transaction:
 
 
 class FinanceTracker:
-    def __init__(self):
+    def __init__(self, username: str):
+        self.username = username
         self.transactions: Dict[str, List[Transaction]] = {"income": [], "expense": []}
         self.budgets: Dict[str, float] = {}
-        self.transactions_file = Path("transactions.json")
+        self.transactions_file = Path(
+            f"transactions/{username}_transactions.json"
+            if username
+            else "transactions.json"
+        )
         self.load_transactions()
 
     def load_transactions(self):
@@ -81,9 +102,12 @@ class FinanceTracker:
                     print("Warning: Invalid transactions format. Resetting to default.")
 
                 self.budgets = data.get("budgets", {})
+
                 if not isinstance(self.budgets, dict):
                     self.budgets = {}
                     print("Warning: Invalid budgets format. Resetting to default.")
+        else:
+            self.save_transactions()
 
     def save_transactions(self):
         data = {
@@ -98,7 +122,7 @@ class FinanceTracker:
 
     def add_transaction(self):
         try:
-            print("\nAdding a new transaction...")
+            print(f"\nAdding a new transaction for {self.username}...")
             transaction_type = input("Enter type (income/expense): ").lower()
             if transaction_type not in ["income", "expense"]:
                 raise ValueError(
@@ -125,16 +149,22 @@ class FinanceTracker:
             if amount <= 0:
                 raise ValueError("Amount must be greater than zero.")
 
-            if transaction_type == "income":
-                category = "Salary"
-            else:
-                print("\nAvailable Categories:")
-                for i, cat in enumerate(Category.list_categories(), 1):
-                    print(f"{i}. {cat}")
-                cat_choice = int(input("Select category number: "))
-                category = Category.list_categories()[cat_choice - 1]
-
             description = input("Enter description: ")
+            category = (
+                Category.auto_categorize(description)
+                if transaction_type == "expense"
+                else "Salary"
+            )
+
+            # if transaction_type == "income":
+            #     category = "Salary"
+            # else:
+            #     print("\nAvailable Categories:")
+            #     for i, cat in enumerate(Category.list_categories(), 1):
+            #         print(f"{i}. {cat}")
+            #     cat_choice = int(input("Select category number: "))
+            #     category = Category.list_categories()[cat_choice - 1]
+
             new_transaction = Transaction(
                 date, amount, category, description, transaction_type
             )
@@ -144,6 +174,19 @@ class FinanceTracker:
 
             self.transactions[transaction_type].append(new_transaction)
             self.save_transactions()
+
+            # Real-time budget alert
+            if transaction_type == "expense" and category in self.budgets:
+                spent = sum(
+                    t.amount
+                    for t in self.transactions["expense"]
+                    if t.category == category
+                )
+                if spent > self.budgets[category]:
+                    print(
+                        f"\n⚠️ Warning: You have exceeded your budget for {category}!\n"
+                    )
+
             print("\nTransaction added successfully!\n")
         except ValueError as e:
             print(f"\nInput Error: {e}\n")
@@ -355,6 +398,10 @@ class FinanceTracker:
         print()
 
     def export_financial_summary(self, file_path):
+        if self.username and "." in file_path:
+            name, ext = file_path.rsplit(".", 1)
+            file_path = f"{name}_{self.username}.{ext}"
+
         try:
             income_data = [
                 [t.date, t.amount, t.description] for t in self.transactions["income"]
