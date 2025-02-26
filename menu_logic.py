@@ -77,12 +77,12 @@ if __name__ == "__main__":
             break
 
         print("\nInvalid credentials.")
-        choice = (
-            input("Would you like to create an account? (yes/no): ").strip().lower()
-        )
+        choice = input("Forgot password? Type 'reset' or 'register' to create an account, or 'exit' to quit: ").strip().lower()
 
-        if choice == "yes":
-            auth.add_credentials()
-        else:
+        if choice == "reset":
+            auth.reset_password()  # Call reset password function
+        elif choice == "register":
+            auth.add_credentials()  # Let user register an account
+        elif choice == "exit":
             print("Exiting application.")
             break
