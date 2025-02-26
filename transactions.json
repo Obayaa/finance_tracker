@@ -1,7 +1,7 @@
 {
     "transactions": {
         "income": [
-            {
+            {   
                 "date": "2024-12-31",
                 "amount": 4000.0,
                 "category": "Salary",
