@@ -35,6 +35,13 @@
                 "category": "Salary",
                 "description": "web design",
                 "transaction_type": "income"
+            },
+            {
+                "date": "2025-02-26",
+                "amount": 2000.0,
+                "category": "Salary",
+                "description": "web development",
+                "transaction_type": "income"
             }
         ],
         "expense": [
