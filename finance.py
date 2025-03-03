@@ -13,7 +13,6 @@ from nltk.corpus import wordnet
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
-# colorama.init(autoreset=True)
 
 
 class Category:
@@ -95,6 +94,12 @@ class FinanceTracker:
             else "transactions.json"
         )
         self.load_transactions()
+        
+    def get_balance(self):
+        total_income = sum(t.amount for t in self.transactions["income"])
+        total_expense = sum(t.amount for t in self.transactions["expense"])
+        return total_income - total_expense
+    
 
     def load_transactions(self):
         if self.transactions_file.exists():
@@ -144,7 +149,7 @@ class FinanceTracker:
                 raise ValueError(
                     "Invalid transaction type. Choose 'income' or 'expense'."
                 )
-
+            
             date_str = input(
                 "Enter the date (YYYY-MM-DD) or press enter to ue today's date: "
             )
@@ -164,22 +169,17 @@ class FinanceTracker:
             amount = float(input("Enter amount: "))
             if amount <= 0:
                 raise ValueError("Amount must be greater than zero.")
+            
+            if transaction_type == "expense" and amount > self.get_balance():
+                print("\n⚠️ Warning: Insufficient balance! Transaction not added.\n")
+                return
 
             description = input("Enter description: ")
             category = (
                 Category.auto_categorize(description)
-                if transaction_type == "expense"
+                if transaction_type == "expense" 
                 else "Salary"
             )
-
-            # if transaction_type == "income":
-            #     category = "Salary"
-            # else:
-            #     print("\nAvailable Categories:")
-            #     for i, cat in enumerate(Category.list_categories(), 1):
-            #         print(f"{i}. {cat}")
-            #     cat_choice = int(input("Select category number: "))
-            #     category = Category.list_categories()[cat_choice - 1]
 
             new_transaction = Transaction(
                 date, amount, category, description, transaction_type
@@ -204,6 +204,11 @@ class FinanceTracker:
                     )
 
             print("\nTransaction added successfully!\n")
+            
+            balance = self.get_balance()
+            if balance < 100:
+                print(f"⚠️ Warning: Your balance is low! Remaining: ${balance}")
+                
         except ValueError as e:
             print(f"\nInput Error: {e}\n")
         except Exception as e:
