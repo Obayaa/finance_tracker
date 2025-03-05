@@ -63,63 +63,33 @@ class MainMenu:
 if __name__ == "__main__":
     auth = UserAuthentication()
     while True:
-        print("\nChoose an option:")
-        print("1. Register a new user")
-        print("2. Login")
-        print("3. Reset Password")
-        print("4. Exit")
-        
-        choice = input("Enter your choice: ")
+        print("\nEnter your credentials to Login.")
+        username = input("Enter Username: ")
+        password = input("Enter Password: ")
 
-        if choice == "1":
-            auth.add_credentials()
-        elif choice == "2":
-            username = input("Enter Username: ")
-            password = input("Enter Password: ")
-            if auth.verify_login(username, password):
-                # print("Login successful!")
-                print("\nLogin successful! Welcome,", username)
-                mainmenu = MainMenu(username)
-                args = parse_args()
-                if any(vars(args).values()):
-                    handle_args(args, mainmenu.tracker, username)
-                else:
-                    mainmenu.run()
-                break
+        if auth.verify_login(username, password):
+            print("\nLogin successful! Welcome,", username)
+            mainmenu = MainMenu(username)
+            args = parse_args()
+            if any(vars(args).values()):
+                handle_args(args, mainmenu.tracker, username)
             else:
-                print("Invalid credentials.")
-        elif choice == "3":
-            auth.reset_password()
-        elif choice == "4":
-            print("Exiting...")
+                mainmenu.run()
             break
-        else:
-            print("Invalid option. Please try again.")
+
+        print("\nInvalid credentials.")
+        choice = input("Forgot password? Type 'reset' or 'register' to create an account, or 'exit' to quit: ").strip().lower()
+
+        if choice == "reset":
+            auth.reset_password()  # Call reset password function
+        elif choice == "register":
+            auth.add_credentials()  # Let user register an account
+        elif choice == "exit":
+            print("Exiting application.")
+            break
+
 
         
         
         
-        # print("\nEnter your credentials to Login.")
-        # username = input("Enter Username: ")
-        # password = input("Enter Password: ")
-
-        #     print("\nLogin successful! Welcome,", username)
-        #     mainmenu = MainMenu(username)
-        #     args = parse_args()
-        #     if any(vars(args).values()):
-        #         handle_args(args, mainmenu.tracker, username)
-        #     else:
-        #         mainmenu.run()
-        #     break
-        # if auth.verify_login(username, password):
-
-        # print("\nInvalid credentials.")
-        # choice = input("Forgot password? Type 'reset' or 'register' to create an account, or 'exit' to quit: ").strip().lower()
-
-        # if choice == "reset":
-        #     auth.reset_password()  # Call reset password function
-        # elif choice == "register":
-        #     auth.add_credentials()  # Let user register an account
-        # elif choice == "exit":
-        #     print("Exiting application.")
-        #     break
+        
