@@ -1,0 +1,9 @@
+date,amount,category,description,transaction_type
+10/01/2024,1000,Salary,Monthly salary,income
+15/01/2024,50,Groceries,Bought groceries,expense
+20/01/2024,200,Rent,January rent payment,expense
+25/01/2024,30,Transportation,Bus pass,expense
+01/02/2024,150,Shopping,Bought new shoes,expense
+05/02/2024,500,Salary,Part-time work,income
+10/02/2024,20,Entertainment,Movie ticket,expense
+15/02/2024,60,Utilities,Electricity bill,expense
