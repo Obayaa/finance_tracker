@@ -95,39 +95,48 @@ class UserAuthentication:
 
 
     def login(self):
-        attempts = 3
-
-        while attempts > 0:
+        while True:
             username = input("Enter Username: ").lower()
             password = getpass.getpass("Enter Password: ")
 
-            # Find user in the credentials list
+            # Check if username exists
             user_found = next((cred for cred in self.credentials["Auth"] if cred.username == username), None)
 
-            # Check if user exists and verify password
-            if user_found and bcrypt.checkpw(password.encode(), user_found.password.encode()):
-                print("Login Successful!")
-                self.username = username
-                return True  # Successful login
-            
-            # Invalid credentials, reduce attempts
-            attempts -= 1
-            print(f"Invalid username or password. You have {attempts} attempts remaining.\n")
+            if not user_found:
+                print("\nNo account found for this username.")
+                choice = input("Would you like to sign up? (y/n): ").strip().lower()
+                if choice == "y":
+                    self.register()  # Call your registration function
+                    return False
+                else:
+                    print("Returning to the main menu.")
+                    return False  # Exit login process
 
-        # If all attempts are exhausted, offer password reset
-        print("\nYou have exhausted all login attempts.")
-        while True:
-            choice = input("Would you like to reset your password? (y/n): ").strip().lower()
-            if choice == "y":
-                self.reset_password()
-                return False
-            elif choice == "n":
-                print("Exiting login process.")
-                return False
-            else:
-                print("Invalid choice. Please enter 'y' or 'n'.")
+            # Allow up to 3 password attempts
+            attempts = 3
+            while attempts > 0:
+                if bcrypt.checkpw(password.encode(), user_found.password.encode()):
+                    print("Login Successful!")
+                    self.username = username
+                    return True  # Successful login
+                
+                attempts -= 1
+                print(f"\nInvalid username or password. You have {attempts} attempts remaining.\n")
+                if attempts > 0:
+                    password = getpass.getpass("Enter Password: ")
 
-
+            # If all attempts are exhausted, offer password reset
+            print("\nYou have exhausted all login attempts.")
+            while True:
+                choice = input("Would you like to reset your password? (y/n): ").strip().lower()
+                if choice == "y":
+                    self.reset_password()
+                    return False
+                elif choice == "n":
+                    print("Exiting login process.")
+                    return False
+                else:
+                    print("Invalid choice. Please enter 'y' or 'n'.")
 
 
 
