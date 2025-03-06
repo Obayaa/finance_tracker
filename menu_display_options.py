@@ -6,7 +6,6 @@ class Auth_Menu:
         
         1. Register
         2. Login
-        3. Reset Password
         
         0. Exit
         ====================
