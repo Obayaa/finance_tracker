@@ -11,13 +11,11 @@ import json
 class Credentials:
     username: str
     password: str
-    # security_answer: str
 
     def to_dict(self):
         return {
             "username": self.username,
             "password": self.password,
-            # "security_answer": self.security_answer,
         }
 
     @classmethod
@@ -25,7 +23,6 @@ class Credentials:
         return cls(
             username=data["username"],
             password=data["password"],
-            # security_answer=data.get("security_answer", ""),
         )
 
 
