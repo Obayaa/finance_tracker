@@ -95,34 +95,38 @@ class UserAuthentication:
 
 
     def login(self):
-        username = input("Enter Username: ").lower()
         attempts = 3
 
         while attempts > 0:
+            username = input("Enter Username: ").lower()
             password = getpass.getpass("Enter Password: ")
-            for cred in self.credentials["Auth"]:
-                if cred.username == username:
-                    if bcrypt.checkpw(password.encode(), cred.password.encode()):
-                        print("Login Successful!")
-                        self.username = username  # Store logged-in username
-                        return True  # Indicate success
+
+            # Find user in the credentials list
+            user_found = next((cred for cred in self.credentials["Auth"] if cred.username == username), None)
+
+            # Check if user exists and verify password
+            if user_found and bcrypt.checkpw(password.encode(), user_found.password.encode()):
+                print("Login Successful!")
+                self.username = username
+                return True  # Successful login
             
+            # Invalid credentials, reduce attempts
             attempts -= 1
-            if attempts > 0:
-                print(f"Incorrect password. You have {attempts} attempts remaining.")
+            print(f"Invalid username or password. You have {attempts} attempts remaining.\n")
+
+        # If all attempts are exhausted, offer password reset
+        print("\nYou have exhausted all login attempts.")
+        while True:
+            choice = input("Would you like to reset your password? (y/n): ").strip().lower()
+            if choice == "y":
+                self.reset_password()
+                return False
+            elif choice == "n":
+                print("Exiting login process.")
+                return False
             else:
-                print("\nYou have exhausted all login attempts.")
-                while True:
-                    choice = input("Would you like to reset your password? (y/n): ").strip().lower()
-                    if choice == "y":
-                        self.reset_password()
-                        return False
-                    elif choice == "n":
-                        print("Exiting login process.")
-                        break
-                        # return False
-                    else:
-                        print("Invalid choice. Please enter 'y' or 'n'.")
+                print("Invalid choice. Please enter 'y' or 'n'.")
+
 
 
 
