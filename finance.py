@@ -280,10 +280,11 @@ class FinanceTracker:
                 )
 
                 transaction.date = (
-                    datetime.date.fromisoformat(new_date)
-                    if new_date
+                    datetime.date.fromisoformat(str(new_date))
+                    if isinstance(new_date, str) and new_date.strip()
                     else transaction.date
                 )
+
                 transaction.amount = (
                     float(new_amount) if new_amount else transaction.amount
                 )
