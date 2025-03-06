@@ -85,33 +85,45 @@ class UserAuthentication:
             self.save_credentials()
             
             print("User registered successfully!")
-            self.username = username  # Store username
-            return True  # Indicate success
+            self.username = username
+            return True 
 
         except Exception as e:
             print(f"Error adding credentials: {e}")
-            return False  # Indicate failure
+            return False 
+
 
 
     def login(self):
         username = input("Enter Username: ").lower()
-        password = getpass.getpass("Enter Password: ")
-
         attempts = 3
+
         while attempts > 0:
+            password = getpass.getpass("Enter Password: ")
             for cred in self.credentials["Auth"]:
                 if cred.username == username:
                     if bcrypt.checkpw(password.encode(), cred.password.encode()):
                         print("Login Successful!")
                         self.username = username  # Store logged-in username
                         return True  # Indicate success
+            
             attempts -= 1
             if attempts > 0:
                 print(f"Incorrect password. You have {attempts} attempts remaining.")
-                password = getpass.getpass("Re-enter Password: ")
+            else:
+                print("\nYou have exhausted all login attempts.")
+                while True:
+                    choice = input("Would you like to reset your password? (y/n): ").strip().lower()
+                    if choice == "y":
+                        self.reset_password()
+                        return False
+                    elif choice == "n":
+                        print("Exiting login process.")
+                        break
+                        # return False
+                    else:
+                        print("Invalid choice. Please enter 'y' or 'n'.")
 
-        print("Login failed.")
-        return False  # Indicate failure
 
 
 
@@ -135,6 +147,7 @@ class UserAuthentication:
                 return True
         return False
 
+
     def reset_password(self):
         username = input("Enter your username: ").lower()
 
@@ -151,35 +164,32 @@ class UserAuthentication:
             print("Error retrieving user data.")
             return
 
-        attempts = 3
-        while attempts > 0:
-            security_answer = input("For security, what was your first pet's name? ").strip().lower()
-            if security_answer == user_found.security_answer:
-                new_password = input("Enter new password: ")
+        while True:
+            new_password = getpass.getpass("Enter new password: ")
+            confirm_password = getpass.getpass("Confirm new password: ")
 
-                if len(new_password) < 8:
-                    print("Your password must be at least 8 characters long")
-                    return
+            if new_password != confirm_password:
+                print("Passwords do not match. Try again.")
+                continue
 
-                if not re.search(r"\d", new_password):
-                    print("Password must contain at least one number")
-                    return
+            if len(new_password) < 8:
+                print("Your password must be at least 8 characters long.")
+                continue
 
-                if not re.search(r"[A-Z]", new_password):
-                    print("Password must contain at least one uppercase letter")
-                    return
+            if not re.search(r"\d", new_password):
+                print("Password must contain at least one number.")
+                continue
 
-                if not re.search(r"[a-z]", new_password):
-                    print("Password must contain at least one lowercase letter")
-                    return
+            if not re.search(r"[A-Z]", new_password):
+                print("Password must contain at least one uppercase letter.")
+                continue
 
-                hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
-                user_found.password = hashed_password
-                self.save_credentials()
-                print("Password has been reset successfully!")
-                return
-            else:
-                attempts -= 1
-                print(f"Incorrect answer. {attempts} attempts remaining.")
-        
-        print("Too many failed attempts. Consider contacting support for recovery.")
+            if not re.search(r"[a-z]", new_password):
+                print("Password must contain at least one lowercase letter.")
+                continue
+
+            hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+            user_found.password = hashed_password
+            self.save_credentials()
+            print("Password has been reset successfully!")
+            return
