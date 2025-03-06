@@ -26,6 +26,8 @@ class MainMenu:
                 elif sub_choice == "4":
                     self.tracker.view_transactions()
                 elif sub_choice == "5":
+                    self.tracker.search_transactions()
+                elif sub_choice == "6":
                     file_path = input("Enter file path for import: ")
                     self.tracker.import_transactions(file_path)
                 elif sub_choice == "0":
@@ -47,8 +49,6 @@ class MainMenu:
                 elif sub_choice == "2":
                     self.tracker.export_financial_summary()
                 elif sub_choice == "3":
-                    self.tracker.search_transactions()
-                elif sub_choice == "4":
                     self.tracker.spending_reports_by_category()
                 elif sub_choice == "0":
                     continue

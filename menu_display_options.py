@@ -29,7 +29,7 @@ class Menu:
         
         1. Manage Transactions
         2. Track Budget
-        3. Data Analysis & Reports
+        3. Financial Analysis & Reports
         
         0. Logout
         ========================
@@ -45,7 +45,8 @@ class Menu:
         2. Update Transaction
         3. Delete Transaction
         4. View Transactions
-        5. Import Transactions
+        5. Search Transactions
+        6. Import Transactions
         
         0. Back
         ========================
@@ -75,8 +76,7 @@ class Menu:
         
         1. View Financial Summary
         2. Export Financial Summary
-        3. Search Transactions
-        4. Spending Reports by Category
+        3. Spending Reports by Category
         
         0. Back
         ========================
