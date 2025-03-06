@@ -1,5 +1,5 @@
 from finance import FinanceTracker
-from menu_display_options import Menu
+from menu_display_options import Auth_Menu, Menu
 from cli_argparse import parse_args, handle_args
 from auth import UserAuthentication
 
@@ -61,35 +61,28 @@ class MainMenu:
 
 
 if __name__ == "__main__":
+    menu = Auth_Menu()
     auth = UserAuthentication()
+
     while True:
-        print("\nEnter your credentials to Login.")
-        username = input("Enter Username: ")
-        password = input("Enter Password: ")
-
-        if auth.verify_login(username, password):
-            print("\nLogin successful! Welcome,", username)
-            mainmenu = MainMenu(username)
-            args = parse_args()
-            if any(vars(args).values()):
-                handle_args(args, mainmenu.tracker, username)
-            else:
+        menu.auth_menu()
+        choice = input("Enter your choice: ")
+        
+        if choice == "1":  # Register
+            if auth.register():  # Only proceed if successful
+                username = auth.username  # Retrieve registered username
+                mainmenu = MainMenu(username)  # Create MainMenu instance
                 mainmenu.run()
-            break
-
-        print("\nInvalid credentials.")
-        choice = input("Forgot password? Type 'reset' or 'register' to create an account, or 'exit' to quit: ").strip().lower()
-
-        if choice == "reset":
-            auth.reset_password()  # Call reset password function
-        elif choice == "register":
-            auth.add_credentials()  # Let user register an account
-        elif choice == "exit":
+        
+        elif choice == "2":  # Login
+            if auth.login():  # Only proceed if successful
+                username = auth.username  # Retrieve logged-in username
+                mainmenu = MainMenu(username)  # Create MainMenu instance
+                mainmenu.run()
+        
+        elif choice == "3":  # Reset Password
+            auth.reset_password()
+        
+        elif choice == "0":  # Exit
             print("Exiting application.")
             break
-
-
-        
-        
-        
-        

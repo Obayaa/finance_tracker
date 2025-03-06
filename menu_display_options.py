@@ -1,3 +1,19 @@
+class Auth_Menu:
+    def auth_menu(self):
+        menu = """
+        Select an option to login to the App
+        ====================
+        
+        1. Register
+        2. Login
+        3. Reset Password
+        
+        0. Exit
+        ====================
+        
+        """
+        print(menu)
+        
 class Menu:
     def __init__(self, username:str):
         self.username = username
@@ -16,7 +32,7 @@ class Menu:
         2. Track Budget
         3. Data Analysis & Reports
         
-        0. Exit
+        0. Logout
         ========================
         """
         print(menu)
@@ -36,6 +52,9 @@ class Menu:
         ========================
         """
         print(menu)
+        
+    
+    
     
     def budget_menu(self):
         menu = """
