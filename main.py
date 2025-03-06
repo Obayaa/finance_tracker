@@ -45,8 +45,7 @@ class MainMenu:
                 if sub_choice == "1":
                     self.tracker.view_financial_summary()
                 elif sub_choice == "2":
-                    file_path = input("Enter file path for export: ")
-                    self.tracker.export_financial_summary(file_path)
+                    self.tracker.export_financial_summary()
                 elif sub_choice == "3":
                     self.tracker.search_transactions()
                 elif sub_choice == "4":
