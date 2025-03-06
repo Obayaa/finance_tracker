@@ -216,8 +216,9 @@ class FinanceTracker:
             print(f"\nAn error occurred: {e}\n")
 
     def delete_transaction(self):
-        print("\nDelete a Transaction\n")
+        print("\nDelete Transactions\n")
         all_transactions = self.transactions["income"] + self.transactions["expense"]
+        
         if not all_transactions:
             print("No transactions recorded.\n")
             return
@@ -230,16 +231,22 @@ class FinanceTracker:
         print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
 
         try:
-            index = int(input("Enter transaction index to delete: "))
-            if 0 <= index < len(all_transactions):
-                transaction = all_transactions.pop(index)
-                self.transactions[transaction.transaction_type].remove(transaction)
+            indices = input("Enter transaction indices to delete (comma-separated): ")
+            indices = sorted(set(map(int, indices.split(","))), reverse=True)
+
+            if all(0 <= index < len(all_transactions) for index in indices):
+                for index in indices:
+                    transaction = all_transactions.pop(index)
+                    self.transactions[transaction.transaction_type].remove(transaction)
+
                 self.save_transactions()
-                print("Transaction deleted successfully!\n")
+                print("Selected transactions deleted successfully!\n")
             else:
-                print("Invalid index.\n")
+                print("Invalid indices. Please enter valid numbers from the list.\n")
+
         except ValueError:
-            print("Invalid input. Please enter a number.\n")
+            print("Invalid input. Please enter numbers separated by commas.\n")
+
 
     def update_transaction(self):
         print("\nUpdate a Transaction\n")
