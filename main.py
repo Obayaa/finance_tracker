@@ -69,20 +69,19 @@ if __name__ == "__main__":
         choice = input("Enter your choice: ")
         
         if choice == "1":  # Register
-            if auth.register():  # Only proceed if successful
-                username = auth.username  # Retrieve registered username
-                mainmenu = MainMenu(username)  # Create MainMenu instance
+            if auth.register():  
+                username = auth.username  
+                mainmenu = MainMenu(username)
                 mainmenu.run()
         
         elif choice == "2":  # Login
-            if auth.login():  # Only proceed if successful
-                username = auth.username  # Retrieve logged-in username
-                mainmenu = MainMenu(username)  # Create MainMenu instance
+            if auth.login(): 
+                username = auth.username 
+                mainmenu = MainMenu(username)  
                 mainmenu.run()
-        
-        elif choice == "3":  # Reset Password
-            auth.reset_password()
         
         elif choice == "0":  # Exit
             print("Exiting application.")
             break
+        else:
+            print("Incorrect choice. Please pick a choice from the options in the menu")
