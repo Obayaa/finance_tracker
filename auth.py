@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import bcrypt
+import getpass
 import re
 from pathlib import Path
 from typing import List, Dict
@@ -10,13 +11,13 @@ import json
 class Credentials:
     username: str
     password: str
-    security_answer: str
+    # security_answer: str
 
     def to_dict(self):
         return {
             "username": self.username,
             "password": self.password,
-            "security_answer": self.security_answer,
+            # "security_answer": self.security_answer,
         }
 
     @classmethod
@@ -24,7 +25,7 @@ class Credentials:
         return cls(
             username=data["username"],
             password=data["password"],
-            security_answer=data.get("security_answer", ""),
+            # security_answer=data.get("security_answer", ""),
         )
 
 
@@ -58,69 +59,76 @@ class UserAuthentication:
         with open(self.credentials_file, "w") as file:
             json.dump(data, file, indent=4)
 
-    def add_credentials(self):
+
+    def register(self):
         try:
-            username = input("Enter Username: ").lower()
+            while True:
+                username = input("Enter Username: ").lower()
+                if any(cred.username == username for cred in self.credentials["Auth"]):
+                    print("Username already exists. Please try a different one.")
+                else:
+                    break
 
-            # Check if username already exists
-            for cred in self.credentials["Auth"]:
-                if cred.username == username:
-                    print("Username already exists.")
-                    return
+            while True:
+                password = input("Enter Password: ")
+                if len(password) < 8:
+                    print("Your password must be at least 8 characters long.")
+                elif not re.search(r"\d", password):
+                    print("Password must contain at least one number.")
+                elif not re.search(r"[A-Z]", password):
+                    print("Password must contain at least one uppercase letter.")
+                elif not re.search(r"[a-z]", password):
+                    print("Password must contain at least one lowercase letter.")
+                else:
+                    break
 
-            password = input("Enter Password: ")
-
-            # Password validation
-            if len(password) < 8:
-                print("Your password must be at least 8 characters long")
-                return
-
-            if not re.search(r"\d", password):
-                print("Password must contain at least one number")
-                return
-
-            if not re.search(r"[A-Z]", password):
-                print("Password must contain at least one uppercase letter")
-                return
-
-            if not re.search(r"[a-z]", password):
-                print("Password must contain at least one lowercase letter")
-                return
-
-            security_answer = (
-                input("Set a security question (e.g., your first pet's name): ")
-                .strip()
-                .lower()
-            )
-            # Hash password with bcrypt
-            hashed_password = bcrypt.hashpw(
-                password.encode(), bcrypt.gensalt()
-            ).decode()
-
-            # Add new credentials (no separate salt needed)
-            new_credentials = Credentials(
-                username=username,
-                password=hashed_password,
-                security_answer=security_answer,
-            )
+            hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+            new_credentials = Credentials(username=username, password=hashed_password)
             self.credentials["Auth"].append(new_credentials)
             self.save_credentials()
+            
             print("User registered successfully!")
+            self.username = username  # Store username
+            return True  # Indicate success
 
         except Exception as e:
             print(f"Error adding credentials: {e}")
+            return False  # Indicate failure
+
+
+    def login(self):
+        username = input("Enter Username: ").lower()
+        password = getpass.getpass("Enter Password: ")
+
+        attempts = 3
+        while attempts > 0:
+            for cred in self.credentials["Auth"]:
+                if cred.username == username:
+                    if bcrypt.checkpw(password.encode(), cred.password.encode()):
+                        print("Login Successful!")
+                        self.username = username  # Store logged-in username
+                        return True  # Indicate success
+            attempts -= 1
+            if attempts > 0:
+                print(f"Incorrect password. You have {attempts} attempts remaining.")
+                password = getpass.getpass("Re-enter Password: ")
+
+        print("Login failed.")
+        return False  # Indicate failure
+
+
 
     def verify_login(self, username, password):
         attempts = 3
         while attempts > 0:
             for cred in self.credentials["Auth"]:
-                if cred.username == username.lower():
-                    if bcrypt.checkpw(password.encode(), cred.password.encode()):
+                if cred["username"] == username:  # Ensure dictionary access
+                    if bcrypt.checkpw(password.encode(), cred["password"].encode()):
                         return True
             attempts -= 1
             if attempts > 0:
                 print(f"Incorrect password. You have {attempts} attempts remaining.")
-                password = input("Re-enter Password: ")
+                password = getpass.getpass("Re-enter Password: ")  # Use getpass for security
         return False
 
     def check_user_exists(self, username):
