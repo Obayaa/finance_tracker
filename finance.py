@@ -5,6 +5,7 @@ from typing import List, Dict
 from pathlib import Path
 from tabulate import tabulate
 import pandas as pd
+import os
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -419,76 +420,79 @@ class FinanceTracker:
         print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
         print()
 
-    def export_financial_summary(self, file_path):
-        if self.username and "." in file_path:
-            name, ext = file_path.rsplit(".", 1)
-            file_path = f"{name}_{self.username}.{ext}"
+
+
+    def export_financial_summary(self):
+        # Create the financial summary folder if it doesn't exist
+        folder_name = "financial_summary"
+        os.makedirs(folder_name, exist_ok=True)
+
+        # Display menu for file format selection
+        print("\nChoose export format:")
+        print("1. CSV")
+        print("2. JSON")
+
+        while True:
+            choice = input("Enter your choice (1 or 2): ").strip()
+            if choice == "1":
+                file_format = "csv"
+                break
+            elif choice == "2":
+                file_format = "json"
+                break
+            else:
+                print("Invalid choice. Please enter 1 or 2.")
+
+        # Define file path
+        file_name = f"financial_report.{file_format}"
+        file_path = os.path.join(folder_name, file_name)
 
         try:
-            income_data = [
-                [t.date, t.amount, t.description] for t in self.transactions["income"]
-            ]
+            # Process income data
+            income_data = [[t.date.isoformat(), t.amount, t.description] for t in self.transactions["income"]]
             income_sum = sum(t.amount for t in self.transactions["income"])
 
-            expense_data = [
-                [t.date, t.amount, t.category, t.description]
-                for t in self.transactions["expense"]
-            ]
+            # Process expense data
+            expense_data = [[t.date.isoformat(), t.amount, t.category, t.description] for t in self.transactions["expense"]]
             total_expense = sum(t.amount for t in self.transactions["expense"])
             net_savings = income_sum - total_expense
 
+            # Process budget data
             budget_data = []
             for category, budget in self.budgets.items():
-                spent = sum(
-                    t.amount
-                    for t in self.transactions["expense"]
-                    if t.category == category
-                )
+                spent = sum(t.amount for t in self.transactions["expense"] if t.category == category)
                 remaining = budget - spent
                 budget_data.append([category, budget, spent, remaining])
 
             total_budget = sum(self.budgets.values())
             planned_savings = income_sum - total_budget
 
-            if file_path.endswith(".csv"):
+            # Export as CSV
+            if file_format == "csv":
                 with open(file_path, "w", newline="") as file:
                     file.write("Income Breakdown\n")
-                    df_income = pd.DataFrame(
-                        income_data, columns=["Date", "Amount", "Description"]
-                    )
+                    df_income = pd.DataFrame(income_data, columns=["Date", "Amount", "Description"])
                     if not df_income.empty:
                         df_income.to_csv(file, index=False, mode="a")
-                    file.write("\n")
-                    file.write(f"Total Income: {income_sum} \n\n")
+                    file.write(f"\nTotal Income: {income_sum} \n\n")
 
                     file.write("Expense Breakdown\n")
-                    df_expense = pd.DataFrame(
-                        expense_data,
-                        columns=["Date", "Amount", "Category", "Description"],
-                    )
+                    df_expense = pd.DataFrame(expense_data, columns=["Date", "Amount", "Category", "Description"])
                     if not df_expense.empty:
                         df_expense.to_csv(file, index=False, mode="a")
-                    file.write("\n")
-
-                    file.write(f"Total Expenses: {total_expense} \n")
-                    file.write(f"Actual Savings (after expenses):  {net_savings} \n\n")
+                    file.write(f"\nTotal Expenses: {total_expense} \n")
+                    file.write(f"Actual Savings (after expenses): {net_savings} \n\n")
 
                     file.write("Budgets Breakdown\n")
-                    df_budget = pd.DataFrame(
-                        budget_data,
-                        columns=["Category", "Budgetted Amount", "Spent", "Remaining"],
-                    )
+                    df_budget = pd.DataFrame(budget_data, columns=["Category", "Budgeted Amount", "Spent", "Remaining"])
                     if not df_budget.empty:
                         df_budget.to_csv(file, index=False, mode="a")
 
-                    file.write("\n")
+                    file.write(f"\nTotal Budget Allocation: {total_budget} \n")
+                    file.write(f"Planned Savings (after budgeting): {planned_savings} \n")
 
-                    file.write(f"Total Budget Allocation: {total_budget} \n")
-                    file.write(
-                        f"Planned Savings (after budgeting): {planned_savings} \n"
-                    )
-
-            elif file_path.endswith(".json"):
+            # Export as JSON
+            elif file_format == "json":
                 data = {
                     "income": {"transactions": income_data, "total_income": income_sum},
                     "expense": {
@@ -507,6 +511,8 @@ class FinanceTracker:
 
             print(f"\nFinancial summary successfully exported to {file_path}\n")
 
+        except Exception as e:
+            print(f"\nError exporting data: {e}\n")
         except Exception as e:
             print(f"\nError exporting data: {e}\n")
 
