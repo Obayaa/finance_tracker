@@ -1,13 +1,17 @@
 import datetime
 import argparse
+import getpass
 from finance import Transaction, FinanceTracker
+from auth import UserAuthentication  # Import authentication module
+import sys
+
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Finance Tracker CLI")
-    
-    # Username argument (required for FinanceTracker)
-    parser.add_argument("--username", type=str, help="Specify username (Required for all actions)", required=True)
+
+    # Username argument (now optional in argparse but required in logic)
+    parser.add_argument("--username", type=str, help="Specify username (Required for all actions)")
 
     # Transaction options
     parser.add_argument("--add-income", type=float, help="Add an income transaction")
@@ -20,18 +24,50 @@ def parse_args():
     parser.add_argument("--export", type=str, help="Export financial summary (CSV/JSON)")
     parser.add_argument("--inport", type=str, help="Import transactions from CSV/JSON")
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    # If username is not provided, ask for it interactively
+    if not args.username:
+        args.username = input("Enter your username: ").strip()
+        if not args.username:
+            print("❌ Error: Username is required.")
+            sys.exit(1)  # Exit the script
+
+    return args
+
+
 
 def handle_args(args):
-    """Handles command-line arguments and ensures transactions are unique."""
-    tracker = FinanceTracker(args.username)  # Now passing username
+    """Handles command-line arguments and ensures the user exists before performing actions."""
+
+    auth = UserAuthentication()  # Create an authentication instance
+
+    # Validate username before proceeding
+    if not auth.check_user_exists(args.username):
+        print(
+            f"\n❌ Error: No account found for '{args.username}'. Please register or try again.\n"
+        )
+        return
+
+    # Optional: Require password for extra security
+    password = getpass.getpass(f"🔒 Enter password for {args.username}: ")
+    if not auth.verify_login(args.username, password):
+        print("\n❌ Incorrect password. Access denied.\n")
+        return
+
+    # Initialize FinanceTracker with verified user
+    tracker = FinanceTracker(args.username)
 
     if args.add_income or args.add_expense:
         transaction_type = "income" if args.add_income else "expense"
         amount = args.add_income if args.add_income else args.add_expense
         category = args.category if args.category else "Other"
         description = args.description if args.description else "No description"
-        date = datetime.date.today() if not args.date else datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
+        date = (
+            datetime.date.today()
+            if not args.date
+            else datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
+        )
 
         # Create transaction object
         transaction = Transaction(date, amount, category, description, transaction_type)
@@ -49,7 +85,7 @@ def handle_args(args):
     if args.export:
         tracker.export_financial_summary(args.export)
         print(f"\n✅ Financial summary exported to {args.export}!\n")
-    
+
     if args.inport:
         tracker.import_transactions(args.inport)
         print(f"\n✅ Transactions imported from {args.inport}!\n")
