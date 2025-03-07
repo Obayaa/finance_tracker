@@ -1,6 +1,5 @@
 from finance import FinanceTracker
 from menu_display_options import Auth_Menu, Menu
-from cli_argparse import parse_args, handle_args
 from auth import UserAuthentication
 
 
