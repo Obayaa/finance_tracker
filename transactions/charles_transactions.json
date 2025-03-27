@@ -1,0 +1,15 @@
+{
+    "transactions": {
+        "income": [
+            {
+                "date": "2025-03-27",
+                "amount": 200.0,
+                "category": "Salary",
+                "description": "debugging",
+                "transaction_type": "income"
+            }
+        ],
+        "expense": []
+    },
+    "budgets": {}
+}
